@@ -1,11 +1,26 @@
 import http from "node:http";
-import express from "express";
 import path from "node:path";
+
+import express from "express";
+import { Server, Socket } from "socket.io";
 
 async function main() {
     const app = express();
     const server = http.createServer(app);
     const port = process.env.PORT || 8000;
+
+    const io = new Server();
+    io.attach(server);
+
+    // Socket io handlers
+    io.on("connection",(socket)=>{
+        console.log(`scoket connection`,{id : socket});
+
+        socket.on("client:checkedbox:change",(data)=>{
+            console.log(`Socket : ${socket.id} : client : checkbox:change ${data.checked}`)
+            io.emit(`server:checkbox:change`,data)
+        })
+    })
 
     app.use(express.static(path.resolve("./public")));
 

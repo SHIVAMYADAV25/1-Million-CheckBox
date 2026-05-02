@@ -10,14 +10,35 @@
 
     </div>
 
+    <script src="/socket.io/socket.io.js"></script>
     <script>
+        const socket = io();
         const container = document.getElementById("container");
 
         const CHECKBOX_COUNT = 1000;
 
+        socket.on("server:checkbox:change",(data)=>{
+            console.log(`socket server Event`,data)
+
+            const {index,checked} = data;
+
+            const input = document.getElementById(`checkbox-${index}`);
+
+            if(input){
+                input.checked = checked;
+            }
+        })
+
         new Array(CHECKBOX_COUNT).fill(null).forEach((_,index)=>{
             const input = document.createElement("input");
             input.type = "checkbox";
+            input.id = `checkbox-${index}`;
+
+            input.addEventListener("change",(event) =>{
+                const checked =  event.target.checked;
+                console.log("Checkboc changes",{index,checked});
+                socket.emit("client:checkedbox:change",{index,checked});
+            })
             container.appendChild(input);
         })
     </script>
