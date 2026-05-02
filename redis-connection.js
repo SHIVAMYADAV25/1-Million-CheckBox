@@ -1,17 +1,17 @@
 import Redis from "ioredis";
 
-const connectRedisServer = async () => {
+const connectRedisServer = () => {
     return new Redis({
         host : "localhost",
         port : 6379
     })
 }
 
-const publisher =  connectRedisServer();
+const publisher = await connectRedisServer();
 
-const redis =  connectRedisServer()
+const redis = await connectRedisServer()
 
-const subscribe =   connectRedisServer();
+const subscribe = await  connectRedisServer();
 
 export {
     publisher,
