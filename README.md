@@ -3,7 +3,7 @@
 > A real-time collaborative grid of 1,000,000 checkboxes. Toggle any checkbox and every connected user sees it change — instantly.
 
 **Live demo:** _[your deployed URL]_  
-**Demo video:** _[your YouTube unlisted link]_
+**Demo video:** https://youtu.be/JmngM9ame6s
 
 ---
 
