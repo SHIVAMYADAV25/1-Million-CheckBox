@@ -1,56 +1,118 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>1 Million checkboxes</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>1 Million Checkboxes</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/style.css" />
 </head>
 <body>
-    <div id="container">
 
+  <!-- HEADER -->
+  <header id="header">
+    <div class="header-inner">
+      <div class="header-brand">
+        <span class="brand-number">1M</span>
+        <div class="brand-text">
+          <span class="brand-title">Checkboxes</span>
+          <span class="brand-sub">A collective experiment</span>
+        </div>
+      </div>
+
+      <div class="header-stats">
+        <div class="stat-block">
+          <span class="stat-value" id="stat-checked">—</span>
+          <span class="stat-label">checked</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-block">
+          <span class="stat-value">1,000,000</span>
+          <span class="stat-label">total</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-block">
+          <span class="stat-value" id="stat-users">—</span>
+          <span class="stat-label">online</span>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <div id="auth-area">
+          <button class="btn btn-primary" id="btn-login" onclick="handleLogin()">Sign in</button>
+          <div class="user-pill hidden" id="user-pill">
+            <span class="user-avatar" id="user-avatar">?</span>
+            <span class="user-name" id="user-name">Anonymous</span>
+            <button class="btn btn-ghost btn-sm" onclick="handleLogout()">Out</button>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <script src="/socket.io/socket.io.js"></script>
-    <script>
-        const socket = io();
-        const container = document.getElementById("container");
+    <div class="progress-rail">
+      <div class="progress-fill" id="progress-fill"></div>
+      <span class="progress-label" id="progress-label">0.00%</span>
+    </div>
+  </header>
 
-        // const CHECKBOX_COUNT = 1000;
+  <!-- TOAST -->
+  <div id="toast" class="toast hidden" role="alert" aria-live="polite"></div>
 
-        socket.on("server:checkbox:change",(data)=>{
-            console.log(`socket server Event`,data)
+  <!-- TOOLBAR -->
+  <div class="toolbar" id="toolbar">
+    <div class="toolbar-inner">
+      <div class="toolbar-left">
+        <label class="toolbar-label">Jump to</label>
+        <input class="toolbar-input" type="number" id="jump-input" placeholder="e.g. 500000" min="1" max="1000000" />
+        <button class="btn btn-sm btn-outline" onclick="jumpToBox()">Go</button>
+      </div>
+      <div class="toolbar-right">
+        <label class="toolbar-label">Zoom</label>
+        <div class="zoom-buttons">
+          <button class="btn btn-sm btn-outline" onclick="changeZoom(-1)">−</button>
+          <span class="zoom-level" id="zoom-label">Medium</span>
+          <button class="btn btn-sm btn-outline" onclick="changeZoom(+1)">+</button>
+        </div>
+        <div class="connection-badge" id="conn-badge">
+          <span class="conn-dot"></span>
+          <span class="conn-text" id="conn-text">Connecting</span>
+        </div>
+      </div>
+    </div>
+  </div>
 
-            const {index,checked} = data;
+  <!-- ANON BANNER -->
+  <div class="anon-banner hidden" id="anon-banner">
+    <span>👋 You're viewing as a guest — <strong>sign in</strong> to toggle checkboxes</span>
+    <button class="btn btn-sm btn-primary" onclick="handleLogin()">Sign in</button>
+    <button class="anon-close" onclick="dismissBanner()">✕</button>
+  </div>
 
-            const input = document.getElementById(`checkbox-${index}`);
+  <!-- LOADING -->
+  <div id="loading-screen" class="loading-screen">
+    <div class="loading-inner">
+      <div class="loading-spinner"></div>
+      <p class="loading-text">Loading 1,000,000 checkboxes…</p>
+      <p class="loading-sub">Fetching state from Redis</p>
+    </div>
+  </div>
 
-            if(input){
-                input.checked = checked;
-            }
-        })
+  <!-- GRID WRAPPER
+       The canvas is position:sticky so it always fills the screen.
+       The scroll-spacer below it creates the scrollable height.
+  -->
+  <div id="grid-wrapper">
+    <div id="canvas-sticky">
+      <canvas id="grid-canvas"></canvas>
+      <div id="hit-area" class="hit-area"></div>
+    </div>
+    <!-- This div's height = (totalRows * cellSize) - canvasH, set by JS -->
+    <div id="scroll-spacer"></div>
+  </div>
 
-        window.addEventListener("load",async ()=>{
-            const response = await fetch("/checkboxes" ,{method : "GET"})
-            // console.log(response);
-            const data = await response.json();
-            console.log(data.checkboxes);
-            if(data && data.checkboxes){
-                data.checkboxes.forEach((serverValue,index)=>{
-                    const input = document.createElement("input");
-
-                    input.type = "checkbox";
-                    input.id = `checkbox-${index}`;
-                    input.checked = serverValue
-
-                    input.addEventListener("change",(event) =>{
-                    const checked =  event.target.checked;
-                    console.log("Checkboc changes",{index,checked});
-                    socket.emit("client:checkedbox:change",{index,checked});
-                })
-                container.appendChild(input);
-                })
-            }
-        })
-    </script>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/app.js"></script>
 </body>
 </html>
